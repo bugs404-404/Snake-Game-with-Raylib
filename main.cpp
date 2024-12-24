@@ -12,6 +12,14 @@ int cellcount = 24;
 
 double lastUpdateTime = 0;
 
+bool ElementInDeque(Vector2 element, deque<Vector2> deque) {
+    for (unsigned int i = 0; i < deque.size(); i++) {
+        if (Vector2Equals(deque[i], element)) {
+            return true;
+        }
+    }
+    return false;
+}
 bool eventTriggered(double interval) {
     double currentTime = GetTime();
     if (currentTime - lastUpdateTime >= interval) {
@@ -25,6 +33,7 @@ class Snake {
     public:
     deque<Vector2> body = {Vector2{6,9},{Vector2{5,9}},{Vector2{4,9}}};
     Vector2 direction = {1,0};
+    bool addSegment = false;
 
     void Draw() {
         for (unsigned int i = 0; i < body.size(); i++)
@@ -37,7 +46,10 @@ class Snake {
     }
 
     void Update() {
-        body.push_front(Vector2Add(body.front(), direction));
+        body.push_front(Vector2Add(body[0],direction));
+      if (addSegment == true) {
+          addSegment = false;
+      }else
         body.pop_back();
     }
 };
@@ -47,14 +59,14 @@ public:
     Vector2 position = {5, 6};
     Texture2D texture;
 
-    Food() {
+    Food(deque<Vector2> snakeBody) {
         Image image = LoadImage("C:\\Users\\Anonymous\\Documents\\Snake Game Raylib\\Graphics\\food.png");
         if (image.data == nullptr) {
             cout << "Failed to load food.png" << endl;
         }
         texture = LoadTextureFromImage(image);
         UnloadImage(image);
-        position = GenerateRandonPos();
+        position = GenerateRandonPos(snakeBody);
 
     }
     ~Food() {
@@ -64,18 +76,25 @@ public:
     void draw() {
         DrawTexture(texture, position.x * cellsize, position.y * cellsize, WHITE);
     }
-
-    Vector2 GenerateRandonPos() {
+    Vector2 GenerateRandomCell() {
         float x =GetRandomValue(0, cellcount - 1);
         float y =GetRandomValue(0, cellcount - 1);
-    return (Vector2){x,y};
+        return Vector2{x,y};
+    }
+
+    Vector2 GenerateRandonPos(deque<Vector2> snakebody) {
+      Vector2 position = GenerateRandomCell();
+        while (ElementInDeque(position, snakebody)) {
+            position = GenerateRandomCell();
+        }
+        return position;
     }
 };
 
 class Game {
 public:
     Snake snake = Snake();
-    Food food = Food();
+    Food food = Food(snake.body);
 
     void Draw()
     {
@@ -88,7 +107,8 @@ public:
     }
     void CheckCollisionWithFood() {
      if (Vector2Equals(snake.body [0], food.position)) {
-         cout << "You win!" << endl;
+         food.position = food.GenerateRandonPos(snake.body);
+         snake.addSegment = true;
      }
     }
 };
