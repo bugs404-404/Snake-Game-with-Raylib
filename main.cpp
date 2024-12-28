@@ -9,6 +9,7 @@ Color darkgreen = (Color){43, 51, 24, 255};
 
 int cellsize = 30;
 int cellcount = 24;
+int  offset = 75;
 
 double lastUpdateTime = 0;
 
@@ -153,7 +154,7 @@ public:
 
 int main() {
     cout << "starting the game.." << endl;
-    InitWindow(cellsize * cellcount, cellsize * cellcount, "Retro Snake");
+    InitWindow(2 * offset + cellSize * cellCount, 2 * offset + cellSize * cellCount, "Retro Snake");
     SetTargetFPS(60);
 
     cout << "Current working directory: " << GetWorkingDirectory() << endl;
